@@ -17,34 +17,44 @@ type Response struct {
 	MainTemp `json:"main"`
 }
 
-func check(err error) {
+func homeHandler(writer http.ResponseWriter, request *http.Request) {
+	html, err := template.ParseFiles("home.html")
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func homeHandler(writer http.ResponseWriter, request *http.Request) {
-	html, err := template.ParseFiles("home.html")
-	check(err)
 	err = html.Execute(writer, nil)
-	check(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getWeatherHandler(writer http.ResponseWriter, request *http.Request) {
 	city := request.FormValue("city")
 	var ans Response
 	resp, err := http.Get("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=49a76d2465245d1581a522d89f08d632&units=metric&lang=ru")
-	check(err)
-	body, _ := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
 	status := resp.Status
 	if status == "404 Not Found" {
 		_, err = writer.Write([]byte("Нет такого города"))
-		check(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
 		err = json.Unmarshal(body, &ans)
-		answer := fmt.Sprintf("%f", ans.MainTemp.Temp)
+		if err != nil {
+			log.Fatal(err)
+		}
+		answer := fmt.Sprintf("%.1f", ans.MainTemp.Temp)
 		_, err = writer.Write([]byte(answer))
-		check(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
