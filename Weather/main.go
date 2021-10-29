@@ -39,8 +39,7 @@ func getWeatherHandler(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	status := resp.Status
-	if status == "404 Not Found" {
+	if resp.StatusCode == http.StatusNotFound {
 		_, err = writer.Write([]byte("Нет такого города"))
 		if err != nil {
 			log.Fatal(err)
